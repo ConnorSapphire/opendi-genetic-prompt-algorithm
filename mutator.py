@@ -269,6 +269,15 @@ class Mutator:
         return s, o
 
     def select_sentence(self, prompt) -> int:
+        """Selects a sentence to be mutated.
+
+        Args:
+            prompt (str): Prompt in string format.
+
+        Returns:
+            int: Index of selected sentence.
+        """
+        
         sentences_orig = self.get_sentences(prompt)
         sentences = self.get_sentences(prompt, True)
         if len(self.history) < 1:
@@ -305,6 +314,13 @@ class Mutator:
         return index
 
     def mutate_sentence(self) -> str:
+        """Mutates the last selected sentence to be mutated. Stored in
+        self.before.
+
+        Returns:
+            str: Mutated sentence.
+        """
+        
         print("Selected:", self.before)
         prompt = "paraphraze: " + self.before
         print(prompt)
@@ -315,6 +331,12 @@ class Mutator:
         return self.after
 
     def update_history(self, scorediff):
+        """Update the history.
+
+        Args:
+            scorediff (float): Change in score caused by most recent changes.
+        """
+        
         self.history.append({
             "before": self.before,
             "after": self.after,
@@ -323,9 +345,24 @@ class Mutator:
 
 
     def update_mutator(self, scorediff):
+        """Update the mutator.
+
+        Args:
+            scorediff (float): Change in score caused by most recent changes.
+        """
+        
         self.update_history(scorediff)
 
     def get_mutated_prompt(self, prompt) -> str:
+        """Mutates a given prompt and returns it.
+
+        Args:
+            prompt (str): Prompt in string format
+
+        Returns:
+            str: Mutated prompt in string format.
+        """
+        
         select_index = self.select_sentence(prompt)
         mutated_sentence = self.mutate_sentence()
         sentences = self.extract_sentences(prompt)
@@ -339,9 +376,17 @@ class Mutator:
         return " ".join(sentences)
 
     def save_history(self, filename):
+        """Save history to the given filename and location.
+
+        Args:
+            filename (str): Filename to save the history data to.
+        """
+        
         pd.DataFrame(self.history).to_csv(filename)
 
 def main():
+    """Main function.
+    """
     # mutator = Mutator("t5-large")
     # instruction = "Answer questions about causal attribution."
     # demos = [

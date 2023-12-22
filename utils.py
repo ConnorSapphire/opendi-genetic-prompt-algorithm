@@ -5,8 +5,7 @@ from transformers import AutoTokenizer, T5EncoderModel, AutoModelForSeq2SeqLM
 from sentence_transformers import SentenceTransformer
 
 def clean_prompt(prompt: str):
-    """
-    Cleans the propt to before passing to the model. Removes extra spaces and '.'
+    """Cleans the prompt before passing it to the model. Removes extra spaces and '.'
     """
     new_prompt = prompt
     new_prompt = re.sub(r"([A-Z])\.", r"\1", new_prompt)
@@ -14,6 +13,9 @@ def clean_prompt(prompt: str):
     return new_prompt
 
 def extract_answer(s: str):
+    """Extracts the answer from the string.
+    """
+    
     answer_match = [i for i in re.finditer(r"answer is (yes|no)\W", s, re.IGNORECASE)]
     if len(answer_match) > 0:
         answer_match = answer_match[-1]
@@ -25,6 +27,9 @@ def extract_answer(s: str):
         return None
 
 def encode_answer(a):
+    """Encodes the given string. Assumes string is "yes" or "no".
+    """
+    
     if a is None:
       return None
     a = a.lower()
@@ -34,6 +39,8 @@ def encode_answer(a):
         return False
 
 def get_model(checkpoint, encoder = False):
+    """Retrieves the Large Language Model for use.
+    """
     if encoder:
         return SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') # T5EncoderModel.from_pretrained(checkpoint)
     else:
@@ -41,6 +48,8 @@ def get_model(checkpoint, encoder = False):
         # return AutoModelForCausalLM.from_pretrained(checkpoint, max_length = 1024 + 512)
 
 def get_tokenizer(checkpoint):
+    """Retrieves the tokeniser.
+    """
     return AutoTokenizer.from_pretrained(checkpoint)
 
 def main():

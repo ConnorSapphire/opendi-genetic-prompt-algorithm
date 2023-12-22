@@ -1,11 +1,26 @@
 import numpy as np
 import pandas as pd
 import json
-# from datasets import load_dataset
 from transformers import AutoTokenizer
 from template import Template
+
 class Dataset:
+    """Dataset class for storing information related to prompts.
+    """
+    
     def __init__(self, format = "json", filepath = None, dict_data = None, template: Template = None):
+        """Initialise Dataset.
+
+        Args:
+            format (str, optional): Format of dataset as a string. Accepts
+            "json", "csv", and "dict". Defaults to "json".
+            filepath (str, optional): Location and filename of the dataset 
+            file. Defaults to None.
+
+        Raises:
+            FileNotFoundError: Unsupported format or file not found.
+            ValueError: Invalid template type. Should be of class Template.
+        """
         try:
             if format == "json":
                 f = open(filepath)

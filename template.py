@@ -1,7 +1,19 @@
 import numpy as np
 
 class Template:
+    """Class to handle interacting with the template files.
+    """
+    
     def __init__(self, template = None, demo_template = None):
+        """Initiate Template.
+
+        Args:
+            template (str, optional): File location of template. Defaults to None.
+            demo_template (str, optional): File location of demo_template. Defaults to None.
+
+        Raises:
+            ValueError: No template file provided.
+        """
         if template:
             try: 
                 self.template = open(template).read()
@@ -24,6 +36,9 @@ class Template:
         return "\n\n".join([self.populate_single_demo(demo) for demo in demos])
 
     def get_prompt(self, instruction, demos = [], question = "", context = ""):
+        """Retrieve prompt from template
+        """
+        
         if len(demos) == 0:
             demo_string = ""
         else:
@@ -33,5 +48,8 @@ class Template:
         return ip
 
     def get_llm_input(self, question = "", instruction = "", demos = [], context = ""):
+        """Retrieve input for LLM.
+        """
+        
         return self.get_prompt(instruction, demos, question, context = context)
         # return f"{get_prompt(instruction, demos)} \nQuestion: {question}\nAnswer: "
