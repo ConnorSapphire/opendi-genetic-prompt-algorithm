@@ -10,7 +10,25 @@ import torch.nn.functional as F
 import pprint
 
 class Mutator:
+    """Class for extracting and mutating strings from a prompt.
+    """
+    
     def __init__(self, model = "t5-small", alpha = 0.1, lamda = 1, p = 0.5, threshold = 0.4, max_length = 1024, combine_prob = 0.3):
+        """Initialise Mutator class.
+
+        Args:
+            model (str, optional): Name of the Large Language Model to use. Defaults to "t5-small".
+            alpha (float, optional): Defaults to 0.1.
+            lamda (int, optional): Defaults to 1.
+            p (float, optional): Probability to use. Defaults to 0.5.
+            threshold (float, optional): Defaults to 0.4.
+            max_length (int, optional): Defaults to 1024.
+            combine_prob (float, optional): Defaults to 0.3.
+
+        Raises:
+            ValueError: Raised by unsupported LLMs.
+        """
+        
         self.history = []
         self.lamda = lamda
         self.prob_select = p
@@ -47,11 +65,29 @@ class Mutator:
         self.ques_start = "Rephrase the next sentence to enhance the performance of the language model."
 
     def clean_prompt(self, prompt: str):
+        """Cleans the prompt.
+
+        Args:
+            prompt (str): Prompt in string format.
+
+        Returns:
+            str: Cleaned prompt in string format.
+        """
+        
         new_prompt = prompt
         new_prompt = re.sub(r"([A-Z])\.", r"\1", new_prompt)
         return new_prompt
 
     def split_into_sentences(self, text):
+        """Use regular expressions to split the prompt into sentences.
+
+        Args:
+            text (str): Prompt in string format.
+
+        Returns:
+            list[str]: List of sentences from the string given.
+        """
+        
         alphabets= "([A-Za-z])"
         prefixes = "(Mr|St|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|Mt)[.]"
         suffixes = "(Inc|Ltd|Jr|Sr|Co)"
@@ -89,6 +125,16 @@ class Mutator:
         return sentences
 
     def extract_sentences(self, prompt: str, remove_tags = False):
+        """Extract clean sentences from the given prompt. Removing tags if told to.
+
+        Args:
+            prompt (str): Prompt in string format.
+            remove_tags (bool, optional): Determines whether to remove tags. Defaults to False.
+
+        Returns:
+            list[str]: List of clean sentences from the original prompt given.
+        """
+        
         new_prompt = clean_prompt(prompt)
         if remove_tags:
             new_prompt = new_prompt.replace("Question: ", "")
@@ -96,18 +142,58 @@ class Mutator:
         return self.split_into_sentences(new_prompt)
 
     def clean_sentences(self, sentences):
+        """Clean sentences.
+
+        Args:
+            sentences (list[str]): List of sentences.
+
+        Returns:
+            list[str]: List of cleaned sentences.
+        """
+        
         sts = sentences.copy()
         sts = [s.strip() for s in sts]
         return sts
 
     def get_sentences(self, prompt, remove_tags = False):
+        """Get cleaned sentences from a prompt. Either removing or keeping tags
+        as specified.
+
+        Args:
+            prompt (str): Prompt in string format.
+            remove_tags (bool, optional): Whether to keep tags in sentences. Defaults to False.
+
+        Returns:
+            list[str]: List of cleaned sentences from the prompt.
+        """
+        
         sentences = self.extract_sentences(prompt, remove_tags = remove_tags)
         return self.clean_sentences(sentences)
 
     def get_bandit_score(self, encoded_sentence, w, ainv):
+        """Calculate score of an encoded sentence.
+
+        Args:
+            encoded_sentence: Encoded sentence to calculate the score of.
+            w
+            ainv
+
+        Returns:
+            float: Score of the encoded sentence
+        """
+        
         return np.dot(encoded_sentence, w) + self.alpha * np.sqrt(np.dot(encoded_sentence, np.dot(ainv, encoded_sentence)))
 
     def encode_sentences(self, sentences):
+        """Encode the given sentences.
+
+        Args:
+            sentences (list[str]): List of sentences.
+
+        Returns:
+            list[str]: List of encoded sentences.
+        """
+        
         return self.encoder.encode(sentences)
 
     def get_demo(self, h):
@@ -123,6 +209,17 @@ class Mutator:
             }
 
     def get_sentence_distance(self, a, b):
+        """Get the distance between two sentences as a measure of similarity.
+
+        Args:
+            a (str): Variant of sentence.
+            b (str): Variant of sentence.
+
+        Returns:
+            float: Numerical distance between two sentences as a measure of
+            similarity.
+        """
+        
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
     def get_relevant_demos(self, sentence):

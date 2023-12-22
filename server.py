@@ -7,7 +7,7 @@ import json
 
 from pyhypercycle_aim import SimpleServer, JSONResponseCORS, aim_uri
 
-from ga import GA
+from genetic_algorithm import GeneticAlgorithm
 from mutator import Mutator
 from dataset import Dataset
 from template import Template
@@ -55,7 +55,7 @@ class GeneticWrapper(SimpleServer):
         dt = request_json['data']
         dataset = Dataset(format = "dict", dict_data = json.loads(dt), template = template)
         mutator = Mutator()
-        ga = GA("t5-small", dataset = dataset, mutator = mutator, num_iter = n_iter, k = n_pop)
+        ga = GeneticAlgorithm("t5-small", dataset = dataset, mutator = mutator, num_iter = n_iter, k = n_pop)
 
         # perform the genetic algorithm search
         best_prompt, score = ga.save_best_prompt()
